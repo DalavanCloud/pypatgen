@@ -50,7 +50,9 @@ class Dictionary:
         return self._hyphens.values()
     
     def compute_total_hyphens(self):
-        return sum(len(h) for h in self.values())
+        p = sum(len(h) for h in self.values())
+        n = sum(len(k) - len(h) for k, h in self.items())
+        return (p, n)
 
     def compute_margins(self):
         margin_left = 1000

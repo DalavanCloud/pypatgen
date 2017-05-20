@@ -15,13 +15,13 @@ class Project:
     
     VERSION = '2016/03/07'
 
-    def __init__(self, dictionary, margins=None, total_hyphens=None):
+    def __init__(self, dictionary, margins=None):
         
         self.dictionary = dictionary
         self.dictionary.make_all_missed()
 
         self.margins = margins or dictionary.compute_margins()
-        self.total_hyphens = total_hyphens or dictionary.compute_total_hyphens()
+        (self.total_hyphens, self.total_nonhyphens) = dictionary.compute_total_hyphens()
         self.created = self.modified = datetime.now()
         self.patternset = PatternSet()
 
@@ -37,6 +37,7 @@ class Project:
             self.dictionary, 
             self.margins, 
             self.total_hyphens, 
+            self.total_nonhyphens, 
             self.patternset, 
             self.missed, 
             self.false
@@ -50,6 +51,7 @@ class Project:
             self.dictionary, 
             self.margins, 
             self.total_hyphens, 
+            self.total_nonhyphens, 
             self.patternset, 
             self.missed, 
             self.false
