@@ -70,6 +70,16 @@ class Dictionary:
             self.missed[word].update(self[word])  # all hyphens are initially missing
             self.false[word].clear()
 
+    def clone(self):
+        copy = Dictionary()
+        attrs = {'_hyphens': collections.OrderedDict,
+                 '_weights': dict,
+                 '_missed': dict,
+                 '_false': dict}
+        for attr, f in attrs.iteritems():
+            setattr(copy, attr, f((k, v.copy()) for (k, v) in getattr(self, attr).iteritems()))
+        return copy
+
     @classmethod
     def load(cls, filename):
 
