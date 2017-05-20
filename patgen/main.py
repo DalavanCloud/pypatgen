@@ -93,7 +93,7 @@ def main_train(args):
     
     total_hyphens = project.total_hyphens
 
-    project.train_new_layer(patlen_rng, selector)
+    layer = project.train_new_layer(patlen_rng, selector)
 
     missed, false = project.missed, project.false
 
@@ -101,6 +101,7 @@ def main_train(args):
     print('False (weighted):', false, percent(false, total_hyphens))
 
     if args.commit:
+        project.commit(layer)
         project.save(args.project)
         print('...Committed!')
     else:

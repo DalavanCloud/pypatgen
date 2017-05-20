@@ -77,15 +77,18 @@ class Project:
         inhibiting = len(self.patternset) & 1
     
         layer = Layer(patlen_range, selector, inhibiting)
-        self.patternset.append(layer)
+        parent = self.patternset[-1] if len(self.patternset) else None
         
         for patlen in stagger_range(patlen_range.start, patlen_range.end + 1):
-            additions = layer.train(patlen, self.dictionary, self.margins)
+            additions = layer.train(patlen, self.dictionary, self.margins, parent=parent)
             print('Selected %s patterns of length %s' % (len(additions), patlen))
     
         # evaluate
-        missed, false = layer.apply_to_dictionary(inhibiting, self.dictionary, margins=self.margins)
+        missed, false = layer.update_stats(inhibiting, self.dictionary, margins=self.margins)
         self.missed = missed
         self.false = false
         
         return layer
+
+    def commit(self, layer) :
+        self.patternset.append(layer)
