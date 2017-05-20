@@ -114,7 +114,8 @@ class Dictionary:
                 f.write(format_dictionary_word(word, hyphens, w))
                 f.write('\n')
 
-    def generate_pattern_statistics(self, inhibiting, patt_len, hyphen_position, margins):
+    def generate_pattern_statistics(self, inhibiting, patt_len, hyphen_position, margins,
+            missed=None, false=None):
         '''
         Takes a dictionary of word hyphenations and
         1. Finds all possible patterns of a given length and given hyphen position, and
@@ -127,20 +128,17 @@ class Dictionary:
     
         for word in self.keys():
             hyphens = self[word]
-            missed  = self.missed[word]
-            false   = self.false[word]
-            weight  = self.weights[word]
     
             for start, ch in chunker(word, hyphenpos=hyphen_position):
                 index = start + hyphen_position - 1
-                w     = weight[start + hyphen_position - 1]
+                w     = self._weights[word][start + hyphen_position - 1]
                 if not inhibiting:
-                    if index in missed:
+                    if index in missed[word]:
                         good[ch] += w
                     elif index not in hyphens:
                         bad[ch] += w
                 else:
-                    if index in  false:
+                    if index in  false[word]:
                         good[ch] += w
                     elif index in hyphens and index not in missed:
                         bad[ch] += w

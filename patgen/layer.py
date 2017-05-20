@@ -47,14 +47,19 @@ class Layer:
     def compute_num_patterns(self):
         return sum(len(val) for val in self.values())
 
-    def train(self, patlen, dictionary, margins):
+    def train(self, patlen, dictionary, margins, parent=None):
+        if parent is None :
+            self.missed = dict((k, v.copy()) for k,v in dictionary.missed.items())
+            self.false = dict((k, v.copy()) for k,v in dictionary.false.items())
+        else :
+            self.missed = dict((k, v.copy()) for k,v in parent.missed.items())
+            self.false = dict((k, v.copy()) for k,v in parent.false.items())
+
         patterns = collections.defaultdict(set)
         for position in range(0, patlen+1):
             for ch, num_good, num_bad in dictionary.generate_pattern_statistics(
-                                                                            self.inhibiting, 
-                                                                            patlen, 
-                                                                            position, 
-                                                                            margins=margins):
+                        self.inhibiting, patlen, position, margins=margins,
+                        missed=self.missed, false=self.false):
                     if self.selector.select(num_good, num_bad):
                         patterns[ch].add(position)
 
@@ -107,25 +112,21 @@ class Layer:
     
         return prediction
 
-    def apply_to_dictionary(self, inhibiting, dictionary, margins):
+    def update_stats(self, inhibiting, dictionary, margins):
         num_missed = 0
         num_false  = 0
     
         for word, hyphens in dictionary.items():
             predicted = self.predict(word, margins=margins)
             
-            missed = dictionary.missed[word]
-            false  = dictionary.false[word]
-            weights = dictionary.weights[word]
-    
             if not inhibiting:
-                missed.difference_update(predicted)
-                false.update(predicted - hyphens)
+                self.missed[word].difference_update(predicted)
+                self.false[word].update(predicted - hyphens)
             else:
-                false.difference_update(predicted)
-                missed.update(hyphens & (predicted - missed))
+                self.false[word].difference_update(predicted)
+                self.missed[word].update(hyphens & (predicted - self.missed[word]))
     
-            num_missed += sum(weights[i] for i in missed)
-            num_false += sum(weights[i] for i in false)
+            num_missed += sum(dictionary._weights[word][i] for i in self.missed[word])
+            num_false += sum(dictionary._weights[word][i] for i in self.false[word])
         
         return num_missed, num_false
