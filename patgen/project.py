@@ -81,7 +81,7 @@ class Project:
         
         for patlen in stagger_range(patlen_range.start, patlen_range.end + 1):
             additions = layer.train(patlen, self.dictionary, self.margins, parent=parent)
-            print('Selected %s patterns of length %s' % (len(additions), patlen))
+            #print('Selected %s patterns of length %s' % (len(additions), patlen))
     
         # evaluate
         missed, false = layer.update_stats(inhibiting, self.dictionary, margins=self.margins)
