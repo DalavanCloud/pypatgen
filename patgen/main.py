@@ -60,8 +60,9 @@ def main_show(args):
     #if project.ignore_weights:
     #    print('\tdictionary weights were ignored (-i flag active)')
     print('\ttotal hyphens: (weighted)', project.total_hyphens)
+    print('\ttotal non-hyphens: ', project.total_nonhyphens)
     print('\ttotal missed : (weighted)', project.missed, percent(project.missed, project.total_hyphens))
-    print('\ttotal false  : (weighted)', project.false, percent(project.false, project.total_hyphens))
+    print('\ttotal false  : (weighted)', project.false, percent(project.false, project.total_nonhyphens))
     print('\tnumber of pattern levels:', len(project.patternset))
     
     for i, layer in enumerate(project.patternset):
@@ -98,7 +99,7 @@ def main_train(args):
     missed, false = project.missed, project.false
 
     print('Missed (weighted):', missed, percent(missed, total_hyphens))
-    print('False (weighted):', false, percent(false, total_hyphens))
+    print('False (weighted):', false, percent(false, project.total_nonhyphens))
 
     if args.commit:
         project.commit(layer)
