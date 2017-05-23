@@ -5,6 +5,13 @@ from patgen.project import Project
 from patgen.range import Range
 from patgen.selector import Selector
 
+# Odd levels add hyphens and so reduce the number of missed words
+#   Increases probability of correctly predicting a positive example: Sensitivity
+# Even levels remove hyphens and so reduce the number of false hits
+#   Increases probability of correctly predicting a negative example: Specificity
+# Also want to weight these against not adjusting the other by 2 much
+# Maybe use F1 score? Weighted?
+# https://en.wikipedia.org/wiki/Sensitivity_and_specificity
 
 def hfunc_odd(false, misses):
     return false + 10 * misses
