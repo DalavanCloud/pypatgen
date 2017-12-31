@@ -5,30 +5,46 @@ from patgen.selector import Selector
 
 
 def get_heuristic(b, g, r, t, hfunc):
-    p = Project.load('bds')
+
+    # generating a set of patterns for the given parameters
+    
+    # initialising
+    p = Project.load('bds') # input the training set
     d = p.dictionary.clone()
     s = Selector(g, b, t)
     range = Range(1, r)
-    p.train_new_layer(range, s)
-    false = p.false
-    missed = p.missed
+
+    # generating patterns
+    p.train_new_layer(range, s) # trains the pattern
+    false = p.false   # number of false positives by the patterns
+    missed = p.missed # number of false negatives by the patterns
 
     p.dictionary = d  # do we need this?
-    return hfunc(false, missed)
+    return hfunc(false, missed) # evaluated by given heuristic function
 
 
-# returns best (b, g r)
+# finds variables (b, g r) which minimse given heuristic function
+#   b g r are the values used to decide whether or not to keep a generated pattern
+#      r: the maximum number of characters in a pattern ('range')
+#      b: weighting of how much we punish bad hyphenation by the pattern
+#      g: weighting of how much we reward a good hyphenation by the pattern
+#   inputs the initial values of variables b, g, r; the threshold for accepting a pattern, and the heuristic function
 def optimise_level(prev_b, prev_g, prev_r, t, hfunc):
     bgrs = set()
     i = 0
 
-    best_h = get_heuristic(prev_b, prev_g, prev_r, t, hfunc)
+    # initialising
+    best_h = get_heuristic(prev_b, prev_g, prev_r, t, hfunc) # current minimum heuristic value
     next_b = prev_b
     next_g = prev_g
     next_r = prev_r
+
+    # optimising
     while(i < 1000):  # loop until convergence
         print "Starting new loop {}".format(i)
 
+        # optimising variable r (maximum number of characters in patterns)
+        print "Testing rs from {} to {}.".format(max(0, prev_r - 1), prev_r + 2)
         for r in xrange(max(0, prev_r - 1), prev_r + 2):
             if r == prev_r and next_g == prev_g and next_b == prev_b:
                 continue
@@ -40,6 +56,7 @@ def optimise_level(prev_b, prev_g, prev_r, t, hfunc):
                 next_r = r
         print "Best: r {}, g {}, b {}. best_h {}".format(next_r, next_g, next_b, best_h)
 
+        print "Testing gs from {} to {}.".format(max(0, prev_g - 1), prev_g + 2)
         for g in xrange(max(0, prev_g - 1), prev_g + 2):
             if next_r == prev_r and g == prev_g and next_b == prev_b:
                 continue
@@ -50,6 +67,8 @@ def optimise_level(prev_b, prev_g, prev_r, t, hfunc):
                 best_h = curr_h
                 next_g = g
         print "Best: r {}, g {}, b {}. best_h {}".format(next_r, next_g, next_b, best_h)
+        
+        print "Testing bs from {} to {}.".format(max(0, prev_b - 1), prev_b + 2)
         for b in xrange(max(0, prev_b - 1), prev_b + 2):
             if next_r == prev_r and next_g == prev_g and b == prev_b:
                 continue
@@ -66,5 +85,5 @@ def optimise_level(prev_b, prev_g, prev_r, t, hfunc):
         bgrs.add((next_b, next_g, next_r))
         i += 1
 
-    print "1000 Iterations Reach (EPIC FAIL)"
+    print "1000 Iterations Reached (FAIL). Returning previous values"
     return (prev_b, prev_g, prev_r)

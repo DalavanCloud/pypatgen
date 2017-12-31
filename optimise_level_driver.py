@@ -13,20 +13,23 @@ from patgen.selector import Selector
 # Maybe use F1 score? Weighted?
 # https://en.wikipedia.org/wiki/Sensitivity_and_specificity
 
+# heuristic for odd levels: want to minimise number of missed words
 def hfunc_odd(false, misses):
+    # weight misses highly
     return false + 10 * misses
 
-
+# heuristic for even levels: want to minimise number of false hits
 def hfunc_even(false, misses):
+    # weight false hits highly
     return 10 * false + misses
 
 
 def optimise_level_driver(b, g, r, t, hfunc_o, hfunc_e):
     level_bgr_map = dict()
-    for i in xrange(1, 10):
-        if i % 2 == 0:
+    for i in xrange(1, 10): # number of levels to perform. Start with odd level (1)
+        if i % 2 == 0: # even level
             b, g, r = optimise_level.optimise_level(b, g, r, t, hfunc_e)
-        else:
+        else:          # odd level
             b, g, r = optimise_level.optimise_level(b, g, r, t, hfunc_o)
 
         print (b, g, r)
